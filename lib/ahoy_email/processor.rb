@@ -116,6 +116,9 @@ module AhoyEmail
                 url: link["href"],
                 signature: signature
               )
+              Rails.logger.debug AhoyEmail.secret_token
+              Rails.logger.debug signature
+              Rails.logger.debug link["href"]
           end
         end
 
