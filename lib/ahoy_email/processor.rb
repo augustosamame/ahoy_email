@@ -92,12 +92,17 @@ module AhoyEmail
       if html_part?
         body = (message.html_part || message).body
 
+        Rails.logger.debug "body: #{body}"
+
         doc = Nokogiri::HTML(body.raw_source)
         doc.css("a[href]").each do |link|
+          Rails.logger.debug "each link: #{link}"
           uri = parse_uri(link["href"])
+          Rails.logger.debug "parsed_link: #{uri}"
           next unless trackable?(uri)
           # utm params first
           if options[:utm_params] && !skip_attribute?(link, "utm-params")
+            Rails.logger.debug "should not see me. utm params off"
             params = uri.query_values(Array) || []
             UTM_PARAMETERS.each do |key|
               next if params.any? { |k, _v| k == key } || !options[key.to_sym]
@@ -106,8 +111,11 @@ module AhoyEmail
             uri.query_values = params
             link["href"] = uri.to_s
           end
-
+          Rails.logger.debug "about to run click replace block"
+        
           if options[:click] && !skip_attribute?(link, "click")
+            Rails.logger.debug AhoyEmail.secret_token
+            Rails.logger.debug link["href"]
             signature = OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new("sha1"), AhoyEmail.secret_token, link["href"])
             link["href"] =
               url_for(
