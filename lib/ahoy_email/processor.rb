@@ -88,6 +88,7 @@ module AhoyEmail
     end
 
     def track_links
+      Rails.logger.debug "track_links method"
       if html_part?
         body = (message.html_part || message).body
 
